@@ -1,0 +1,1 @@
+run("Z1 CZI to TIF for Timelapse and Multiview 07012015 SD JH", "experiment=full_coal_2 number=2 angles/views?=4 timepoints=4 illuminations=2 bin=1 bin=1 bin=1 original=/PATH/TO/FILES/TEST/firstczi.czi choose=/PATH/TO/FILES/TEST/);

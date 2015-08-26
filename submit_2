@@ -1,0 +1,15 @@
+#!/bin/bash
+#SBATCH -J DEF_MULTIVIEW
+#SBATCH -N 1
+#SBATCH -n 1
+#SBATCH -t 0-00:10
+#SBATCH -p general,serial_requeue
+#SBATCH --mem=8000
+#SBATCH -o step_2.out
+#SBATCH -e step_2.err
+export DISPLAY=:3
+Xvfb /private/tmp/com.apple.launchd.cYklvbBXAL/org.macosforge.xquartz:0 -auth /dev/null &
+echo DEFINE DATASET>>LOG
+/n/home11/jhoffmann/Fiji/Fiji.app/ImageJ-linux64 --memory=8000m -macro TESTRUN2.ijm
+/n/home11/jhoffmann/Fiji/Fiji.app/ImageJ-linux64 --memory=8000m -macro quit.ijm
+echo DONE WITH DEFINE DATASET>>LOG
