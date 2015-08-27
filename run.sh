@@ -18,16 +18,19 @@ echo "T_Start is: $t_start"
 echo "T_End is: $t_end"
 echo "Number of angles: $no_angles"
 echo "Number of channels: $no_channels"
-echo "Making log file"
 
-#####PRINTING EVERYTHING TO A LOG FILE
-echo "Log of dataset $run_name">"LOG"
-echo "Dataset is: $dataset">>"LOG"
-echo "Iteration is: $iter">>"LOG"
-echo "T_Start is: $t_start">>"LOG"
-echo "T_End is: $t_end">>"LOG"
-echo "Number of angles: $no_angles">>"LOG"
-echo "Number of channels: $no_channels">>"LOG"
+if [ $createlogfile=$True ];
+	then
+		echo "Making log file"
+		#####PRINTING EVERYTHING TO A LOG FILE
+		echo "Log of dataset $run_name">"LOG"
+		echo "Dataset is: $dataset">>"LOG"
+		echo "Iteration is: $iter">>"LOG"
+		echo "T_Start is: $t_start">>"LOG"
+		echo "T_End is: $t_end">>"LOG"
+		echo "Number of angles: $no_angles">>"LOG"
+		echo "Number of channels: $no_channels">>"LOG"
+fi
 
 #make quit file
 echo "run("Quit")"';'>"quit.ijm"
@@ -45,12 +48,18 @@ if [ $czi2tifQ=$True ];
 		echo "#SBATCH --mem=$RAM1">>"submit_1"
 		echo "#SBATCH -o step_1.out">>"submit_1"
 		echo "#SBATCH -e step_1.err">>"submit_1"
-		echo "export DISPLAY=:2">>"submit_1"
+		echo "export DISPLAY=:11">>"submit_1"
 		echo "Xvfb "'$DISPLAY'" -auth /dev/null &">>"submit_1"
-		echo "echo ""STARTING CZI CONVERSION"">>""LOG">>"submit_1"
-		echo "$FIJIPATH --memory=$RAM1""m -macro ""$run_name""1.ijm">>"submit_1"
-		echo "$FIJIPATH --memory=$RAM1""m -macro quit.ijm">>"submit_1"
-		echo "echo ""FINISHED CZI CONVERSION"">>""LOG">>"submit_1"
+		if [ $createlogfile=$True ];
+			then		
+				echo "echo "'"STARTING CZI CONVERSION"'">>"'"LOG"'>>"submit_1"
+		fi
+		echo "$FIJIPATH --memory=$RAM1""m -macro ""./$run_name""1.ijm">>"submit_1"
+		echo "$FIJIPATH --memory=$RAM1""m -macro ./quit.ijm">>"submit_1"
+		if [ $createlogfile=$True ];
+			then
+				echo "echo "'"FINISHED CZI CONVERSION"'">>"'"LOG"'>>"submit_1"
+		fi
 		echo "FINISHED CZI TO TIF PROCESS"
 fi
 #####DEFINE MULTIVIEW DATASET
@@ -67,12 +76,18 @@ if [ $defineQ=$True ];
 		echo "#SBATCH --mem=$RAM2">>"submit_2"
 		echo "#SBATCH -o step_2.out">>"submit_2"
 		echo "#SBATCH -e step_2.err">>"submit_2"
-		echo "export DISPLAY=:3">>"submit_2"
+		echo "export DISPLAY=:33">>"submit_2"
 		echo "Xvfb "'$DISPLAY'" -auth /dev/null &">>"submit_2"
-		echo "echo ""DEFINE DATASET"">>""LOG">>"submit_2"
-		echo "$FIJIPATH --memory=$RAM2""m -macro ""$run_name""2.ijm">>"submit_2"
-		echo "$FIJIPATH --memory=$RAM2""m -macro quit.ijm">>"submit_2"
-		echo "echo ""DONE WITH DEFINE DATASET"">>""LOG">>"submit_2"
+		if [ $createlogfile=$True ];
+			then
+				echo "echo "'"DEFINE DATASET"'">>"'"LOG"'>>"submit_2"
+		fi
+		echo "$FIJIPATH --memory=$RAM2""m -macro ""./$run_name""2.ijm">>"submit_2"
+		echo "$FIJIPATH --memory=$RAM2""m -macro ./quit.ijm">>"submit_2"
+		if [ $createlogfile=$True ];
+			then
+				echo "echo "'"DONE WITH DEFINE DATASET"'">>"'"LOG"'>>"submit_2"
+		fi
 fi
 
 ####Detect AND REGISTER DATASET BASED ON INTEREST POITNS
@@ -90,9 +105,16 @@ if [ $detectregQ=$True ];
 		echo "#SBATCH --mem=$RAM3">>"submit_3"
 		echo "#SBATCH -o step_3.out">>"submit_3"
 		echo "#SBATCH -e step_3.err">>"submit_3"
-		echo "export DISPLAY=:4">>"submit_3"
+		echo "export DISPLAY=:13">>"submit_3"
 		echo "Xvfb "'$DISPLAY'" -auth /dev/null &">>"submit_3"
-		echo "$FIJIPATH --memory=$RAM3""m -macro ""$run_name""3.ijm">>"submit_3"
-		echo "$FIJIPATH --memory=$RAM3""m -macro quit.ijm">>"submit_3"
-		echo "echo ""DONE WITH DETECT AND REGISTER"">>""LOG">>"submit_3"
+		if [ $createlogfile=$True ];
+			then
+				echo "echo "'"DETECTING AND REGISTERING"'">>"'"LOG"'>>"submit_3"
+		fi
+		echo "$FIJIPATH --memory=$RAM3""m -macro ""./$run_name""3.ijm">>"submit_3"
+		echo "$FIJIPATH --memory=$RAM3""m -macro ./quit.ijm">>"submit_3"
+		if [ $createlogfile=$True ];
+			then
+				echo "echo "'"DONE WITH DETECT AND REGISTER"'">>"'"LOG"'>>"submit_3"
+		fi
 fi

@@ -14,7 +14,7 @@ FIJIPATH="/n/home11/jhoffmann/Fiji/Fiji.app/ImageJ-linux64"
 czi2tifQ='True'
 defineQ='True'
 detectregQ='True'
-True='True'
+createlogfile='True'
 # ------------------------------ DECONVOLUTION ---------------------------------------
 iter=15
 # ------------------------------ SYSTEM REQUIREMENTS ---------------------------------------
@@ -30,3 +30,30 @@ time_2="0-00:10"
 no_processors3=64
 RAM3=128000
 time_3="1-00:00"
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+True='True'
