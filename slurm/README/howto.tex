@@ -1,0 +1,124 @@
+\documentclass[11pt]{article}
+\usepackage{graphicx}
+\usepackage{amsmath,amssymb,cuted} % define this before the line numbering.
+%\usepackage{ruler}
+\usepackage{color}
+\usepackage[margin=1in]{geometry}
+%\usepackage{hyperref}
+\usepackage{setspace}
+\usepackage{url}
+\usepackage{listings}
+\usepackage{color}
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+\usepackage[colorlinks=true]{hyperref}
+\usepackage[]{algorithm2e}
+
+\usepackage{cmbright}
+%\usepackage{arev}
+
+
+\renewcommand\familydefault{\sfdefault}
+
+\lstdefinestyle{mystyle}{
+    backgroundcolor=\color{backcolour},   
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{magenta},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\footnotesize\ttfamily,
+    breakatwhitespace=false,         
+    breaklines=true,                 
+    captionpos=b,                    
+    keepspaces=true,                 
+    numbers=left,                    
+    numbersep=5pt,                  
+    showspaces=false,                
+    showstringspaces=false,
+    showtabs=false,                  
+    tabsize=2
+}
+
+ 
+\lstset{style=mystyle}
+\doublespacing
+\begin{document}
+
+\begin{center}\Large{Running a Job on the Cluster}\end{center}
+\begin{center}Seth and Jordan, August 27\end{center}
+\begin{center}\small{\url{jhoffmann@fas.harvard.edu}}\end{center}
+\section*{Setup}
+\subsection*{Step 1: Log In and Ensure that \texttt{Fiji} is Setup}
+Log in to Odyssey. Type \texttt{ls} and see if \texttt{Fiji} is there. If not, run:
+\begin{lstlisting}[language=bash, caption=Download \texttt{Fiji}]
+wget http://jenkins.imagej.net/job/Stable-Fiji/lastSuccessfulBuild/artifact/fiji-linux64.tar.gz
+tar -zxvf fiji-linux64.tar.gz
+\end{lstlisting}
+Now, when you type \texttt{ls} you should see a folder containing \texttt{Fiji.app}. If you \texttt{cd Fiji.app} to get inside the directory you should see a file \texttt{ImageJ-linux64}. Type in \texttt{pwd}. Remember this information. This is the file path to your copy of \texttt{Fiji}.
+
+\subsection*{Step 2: Get the Code}
+Next, we want to pull a copy of the most recent version of the code from github. Ensure that you are in your home directory by typing \texttt{cd \~}. Next, we want to make a directory that will contain the code. For consistency, consider: \texttt{mkdir Odyssey}. Next, \texttt{cd} into whatever folder you made and then run:
+\begin{lstlisting}[language=bash, caption=Setup Github Repository]
+git clone https://github.com/JordanHoffmann/seth_and_jordan.git
+\end{lstlisting}
+Now, you should see many files. You can always update the version of the code here with the command:
+\begin{lstlisting}[language=bash, caption=Setup Github Repository]
+git pull origin master
+\end{lstlisting}
+Okay, now we have all of the code as well as \texttt{Fiji}. Time to jam.
+\section*{Running A Job}
+Okay, now we want to run our first job. To be safe, let us copied the required files to a new directory. Type:
+\begin{lstlisting}[language=bash, caption=Copy]
+cd ~
+mkdir ax_ex_4
+cd ax_ex_4
+cp ../Odyssey/*sh ./
+cp ../Odyssey/*py ./
+\end{lstlisting}
+For this task, I think that we just need to Python scripts, the main file is shown below. 
+\begin{lstlisting}[language=Python, caption=\texttt{SETUP\_1.py}]
+PATH = '/n/regal/rycroft_lab/jordan/full_ax_ex_4'
+iterations = str(15)
+Max_T = 300
+
+def submit(time):
+        t=str(time)
+        return "#!/bin/bash \n#SBATCH -J im_"+t+"\n#SBATCH -N 1\n#SBATCH -n 25\n#SBATCH -t 3-00:00\n#SBATCH -p general\n#SBATCH --mem=100000\n#SBATCH -o out_"+t+".out\n#SBATCH -e err_"+t+".err\nexport DISPLAY=:"+t+"\nXvfb $DISPLAY -auth /dev/null &\n/n/home11/jhoffmann/Fiji/Fiji.app/ImageJ-linux64 --memory=100000m -macro ./time_"+t+".ijm"
+def do_tp(time):
+        t = str(time)
+        return 'run("Fuse/Deconvolve Dataset", "browse='+PATH+'/dataset.xml select_xml='+PATH+'/dataset.xml process_angle=[All angles] process_channel=[Single channel (Select from List)] process_illumination=[All illuminations] process_timepoint=[Single Timepoint (Select from List)] processing_channel=[channel 1] processing_timepoint=[Timepoint '+t+'] type_of_image_fusion=[Multi-view deconvolution] bounding_box=[Define manually] fused_image=[Save as TIFF stack] minimal_x=130 minimal_y=30 minimal_z=-65 maximal_x=780 maximal_y=1860 maximal_z=600 imglib2_container=[CellImg (large images)] imglib2_container_ffts=ArrayImg save_memory type_of_iteration=[Efficient Bayesian - Optimization I (fast, precise)] image_weights=[Virtual weights (less memory, slower)] osem_acceleration=[1 (balanced)] number_of_iterations='+iterations+' use_tikhonov_regularization tikhonov_parameter=0.0060 compute=[Entire image at once] compute_on=[CPU (Java)] psf_estimation=[Provide file with PSF] psf_display=[Do not show PSFs] output_file_directory='+PATH+'/decon_15/ use_same_psf_for_all_angles/illuminations browse=['+PATH+'/psf.tif] transform_psfs psf_file=['+PATH+'/psf.tif]");'
+
+if __name__ == '__main__':
+        for TIME in xrange(1,Max_T+1):
+                text_file = open("time_"+str(TIME)+".ijm", "w")
+                string = do_tp(TIME)
+                text_file.write(string)
+                text_file.close()
+                text_file2 = open("submit_"+str(TIME), "w")
+                string2 = submit(TIME)
+                text_file2.write(string2)
+                text_file2.close()
+
+
+\end{lstlisting}
+We will need to change Line 7 to have the path to your copy of \texttt{Fiji}. Right now this script is a legacy code that is tried and true. Hopefully soon, it is part of a large submit script. Note that I request 25 processors and 100 GB of RAM.  We also are only submitting to \texttt{general}. Next, run the command:
+\begin{lstlisting}[language=bash, caption=Run Setup]
+python Setup_1.py
+\end{lstlisting}
+This company might take about 5 seconds and should generate 600 different files. Now we just need to do the submission. There is a file called \texttt{to\_do\_list.py} that figures out what files still need to be done. Perhaps for the sake of this, the simplest thing to do is to type:
+\begin{lstlisting}[language=bash, caption=Run Setup]
+python to_do_list.py > RUN.sh
+sh RUN.sh
+\end{lstlisting}
+Now you should \texttt{JOBID}s get printed to the screen. You might need to hit one final enter to submit the last job. Now, you can type:
+\begin{lstlisting}[language=bash, caption=Check Status]
+squeue -u donoughe
+\end{lstlisting}
+This list takes some time to populate, but eventually you should see all the jobs there. At some point, they should start switching from \texttt{PD} to \texttt{R}. 
+
+
+
+\end{document}
+

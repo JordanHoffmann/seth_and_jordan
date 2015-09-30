@@ -1,0 +1,5 @@
+file_path	/test/file/path/
+t_start	2
+t_end	3
+no_angles	4
+channels	5 
